@@ -1,0 +1,28 @@
+version: '3'
+services:
+  go-sample-api:
+    container_name: api
+    image: golang:1.12.6
+    volumes: 
+      - ./go-app:/go/app
+      - ~/go/:/go
+    tty: 'true'
+    ports:
+      - "8080:8080"
+    working_dir: /go/app
+    environment:
+      - "GOPATH=/go"
+    command: go run main.go
+  mysql:
+    container_name: mysql
+    image: mysql:5.7
+    ports: 
+      - "3306:3306"
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD:
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+      MYSQL_DATABASE: go_sample
+    volumes:
+      - ./db/mysql_data:/var/lib/mysql
