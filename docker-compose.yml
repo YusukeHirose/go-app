@@ -2,17 +2,13 @@ version: '3'
 services:
   go-sample-api:
     container_name: api
-    image: golang:1.12.6
+    build: .
     volumes: 
-      - ./go-app:/go/app
-      - ~/go/:/go
+      - ./app:/go/app
     tty: 'true'
     ports:
       - "8080:8080"
-    working_dir: /go/app
-    environment:
-      - "GOPATH=/go"
-    command: go run main.go
+
   mysql:
     container_name: mysql
     image: mysql:5.7
