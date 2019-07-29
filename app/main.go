@@ -20,6 +20,11 @@ type Dog struct {
 	Type string `json:"type"`
 }
 
+type Monkey struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
 func getHelloWorld(c echo.Context) error {
 	return c.String(http.StatusOK, "Hello, world!!")
 }
@@ -68,7 +73,7 @@ func addCat(c echo.Context) error {
 	return c.String(http.StatusOK, "We got the cat!")
 }
 
-func addDogs(c echo.Context) error {
+func addDog(c echo.Context) error {
 	dog := Dog{}
 
 	defer c.Request().Body.Close()
@@ -83,11 +88,25 @@ func addDogs(c echo.Context) error {
 	return c.String(http.StatusOK, "We got the dog!")
 }
 
+func addMonkey(c echo.Context) error {
+	monkey := Monkey{}
+
+	err := c.Bind(&monkey)
+	if err != nil {
+		log.Printf("Faild processing  addMonkey: %s", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	log.Printf("this is dog: %#v", monkey)
+	return c.String(http.StatusOK, "We got the monkey!")
+}
+
 func main() {
 	e := echo.New()
 	e.GET("/", getHelloWorld)
 	e.GET("/cats/:data", getCats)
 	e.POST("/cats", addCat)
-	e.POST("/dogs", addDogs)
+	e.POST("/dogs", addDog)
+	e.POST("/monkeys", addMonkey)
 	e.Logger.Fatal(e.Start(":8080"))
 }
