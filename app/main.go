@@ -7,6 +7,11 @@ import (
 	"github.com/labstack/echo"
 )
 
+type Cat struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
 func getHelloWorld(c echo.Context) error {
 	return c.String(http.StatusOK, "Hello, world!!")
 }
@@ -31,7 +36,6 @@ func getCats(c echo.Context) error {
 	return c.JSON(http.StatusBadRequest, map[string]string{
 		"error": "You need to lets us know if you want json or string data",
 	})
-
 }
 
 func main() {
