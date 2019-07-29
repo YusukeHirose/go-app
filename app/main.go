@@ -15,6 +15,11 @@ type Cat struct {
 	Type string `json:"type"`
 }
 
+type Dog struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
 func getHelloWorld(c echo.Context) error {
 	return c.String(http.StatusOK, "Hello, world!!")
 }
@@ -44,7 +49,9 @@ func getCats(c echo.Context) error {
 func addCat(c echo.Context) error {
 	cat := Cat{}
 
+	// 最後に呼ぶ処理をdeferで記述
 	defer c.Request().Body.Close()
+
 	b, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
 		log.Printf("Faild reading the request body for addCats: %s", err)
@@ -61,10 +68,26 @@ func addCat(c echo.Context) error {
 	return c.String(http.StatusOK, "We got the cat!")
 }
 
+func addDogs(c echo.Context) error {
+	dog := Dog{}
+
+	defer c.Request().Body.Close()
+
+	err := json.NewDecoder(c.Request().Body).Decode(&dog)
+	if err != nil {
+		log.Printf("Faild processing  addDog: %s", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	log.Printf("this is dog: %#v", dog)
+	return c.String(http.StatusOK, "We got the dog!")
+}
+
 func main() {
 	e := echo.New()
 	e.GET("/", getHelloWorld)
 	e.GET("/cats/:data", getCats)
 	e.POST("/cats", addCat)
+	e.POST("/dogs", addDogs)
 	e.Logger.Fatal(e.Start(":8080"))
 }
