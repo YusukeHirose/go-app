@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 type Cat struct {
@@ -101,8 +102,21 @@ func addMonkey(c echo.Context) error {
 	return c.String(http.StatusOK, "We got the monkey!")
 }
 
+func mainAdmin(c echo.Context) error {
+	return c.String(http.StatusOK, "you are on the secret main pate!")
+}
+
 func main() {
 	e := echo.New()
+
+	g := e.Group("/admin")
+	// document通りでも警告出る。
+	g.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
+	}))
+
+	g.GET("/main", mainAdmin)
+
 	e.GET("/", getHelloWorld)
 	e.GET("/cats/:data", getCats)
 	e.POST("/cats", addCat)
