@@ -119,6 +119,12 @@ func mainCookie(c echo.Context) error {
 }
 
 func mainJwt(c echo.Context) error {
+	user := c.Get("user")
+	token := user.(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+
+	log.Println("User Name: ", claims["name"], "User ID: ", claims["jti"])
+
 	return c.String(http.StatusOK, "you are ont top secret jwt page!")
 }
 
@@ -133,7 +139,7 @@ func login(c echo.Context) error {
 		cookie.Expires = time.Now().Add(48 * time.Hour)
 		c.SetCookie(cookie)
 
-		// TODO: create jwt token
+		// create jwt token
 		token, err := createJwtToken()
 		if err != nil {
 			log.Println("Error Creating JWT token", err)
@@ -212,7 +218,6 @@ func main() {
 
 		return false, nil
 	}))
-
 	cookieGroup.Use(checkCookie)
 	jwtGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: "HS512",
