@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -26,6 +27,11 @@ type Dog struct {
 type Monkey struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
+}
+
+type JwtClaims struct {
+	Name string `json:"name"`
+	jwt.StandardClaims
 }
 
 func getHelloWorld(c echo.Context) error {
@@ -112,6 +118,10 @@ func mainCookie(c echo.Context) error {
 	return c.String(http.StatusOK, "you are on the secret cookie main page!")
 }
 
+func mainJwt(c echo.Context) error {
+	return c.String(http.StatusOK, "you are ont top secret jwt page!")
+}
+
 func login(c echo.Context) error {
 	username := c.QueryParam("username")
 	password := c.QueryParam("password")
@@ -123,10 +133,36 @@ func login(c echo.Context) error {
 		cookie.Expires = time.Now().Add(48 * time.Hour)
 		c.SetCookie(cookie)
 
-		return c.String(http.StatusOK, "You were logged in!")
+		// TODO: create jwt token
+		token, err := createJwtToken()
+		if err != nil {
+			log.Println("Error Creating JWT token", err)
+			return c.String(http.StatusInternalServerError, "something went wrong")
+		}
+		return c.JSON(http.StatusOK, map[string]string{
+			"message": "You were logged in!",
+			"token":   token,
+		},
+		)
 	}
 
 	return c.String(http.StatusUnauthorized, "Your username and passward were wrong!")
+}
+
+func createJwtToken() (string, error) {
+	clames := JwtClaims{
+		"tarou",
+		jwt.StandardClaims{
+			Id:        "main_user_id",
+			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
+		},
+	}
+	rawToken := jwt.NewWithClaims(jwt.SigningMethodHS512, clames)
+	token, err := rawToken.SignedString([]byte("mySecret"))
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
@@ -162,6 +198,8 @@ func main() {
 
 	adminGroup := e.Group("/admin")
 	cookieGroup := e.Group("/cookie")
+	jwtGroup := e.Group("/jwt")
+
 	// document通りでも警告出る。
 	adminGroup.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
@@ -176,10 +214,14 @@ func main() {
 	}))
 
 	cookieGroup.Use(checkCookie)
+	jwtGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningMethod: "HS512",
+		SigningKey:    []byte("mySecret"),
+	}))
 
 	adminGroup.GET("/main", mainAdmin)
-
 	cookieGroup.GET("/main", mainCookie)
+	jwtGroup.GET("/main", mainJwt)
 
 	e.GET("/login", login)
 	e.GET("/", getHelloWorld)
