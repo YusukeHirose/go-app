@@ -103,11 +103,21 @@ func addMonkey(c echo.Context) error {
 }
 
 func mainAdmin(c echo.Context) error {
-	return c.String(http.StatusOK, "you are on the secret main pate!")
+	return c.String(http.StatusOK, "you are on the secret main page!")
+}
+
+func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set(echo.HeaderServer, "BlueBot/1.0")
+		c.Response().Header().Set("NotReallyHeader", "thisHaveNoMeaning")
+		return next(c)
+	}
 }
 
 func main() {
 	e := echo.New()
+
+	e.Use(ServerHeader)
 
 	g := e.Group("/admin")
 	// document通りでも警告出る。
