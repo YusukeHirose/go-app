@@ -103,16 +103,34 @@ func addMonkey(c echo.Context) error {
 }
 
 func mainAdmin(c echo.Context) error {
-	return c.String(http.StatusOK, "you are on the secret main pate!")
+	return c.String(http.StatusOK, "you are on the secret main page!")
+}
+
+func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set(echo.HeaderServer, "BlueBot/1.0")
+		c.Response().Header().Set("NotReallyHeader", "thisHaveNoMeaning")
+		return next(c)
+	}
 }
 
 func main() {
 	e := echo.New()
 
+	e.Use(ServerHeader)
+
 	g := e.Group("/admin")
 	// document通りでも警告出る。
 	g.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
+	}))
+
+	g.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if username == "tarou" && password == "1234" {
+			return true, nil
+		}
+
+		return false, nil
 	}))
 
 	g.GET("/main", mainAdmin)
