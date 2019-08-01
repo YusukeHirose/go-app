@@ -14,5 +14,11 @@ func Init() *echo.Echo {
 	middlewares.SetCookieMiddlewares(cookieGroup)
 	middlewares.SetJwtMiddlewares(jwtGroup)
 
+	api.MainGroup(e)
+
+	api.AdminGroup(adminGroup)
+	api.CookieGroup(cookieGroup)
+	api.JwtGroup(jwtGroup)
+
 	return e
 }
