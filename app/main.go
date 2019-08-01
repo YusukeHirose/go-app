@@ -209,9 +209,7 @@ func main() {
 
 	e.Use(ServerHeader)
 
-	adminGroup := e.Group("/admin")
-	cookieGroup := e.Group("/cookie")
-	jwtGroup := e.Group("/jwt")
+
 
 	// document通りでも警告出る。
 	adminGroup.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
