@@ -9,5 +9,10 @@ func Init() *echo.Echo {
 	cookieGroup := e.Group("/cookie")
 	jwtGroup := e.Group("/jwt")
 
+	middlewares.SetMainMiddlewares(e)
+	middlewares.SetAdminMiddlewares(adminGroup)
+	middlewares.SetCookieMiddlewares(cookieGroup)
+	middlewares.SetJwtMiddlewares(jwtGroup)
+
 	return e
 }

@@ -178,14 +178,6 @@ func createJwtToken() (string, error) {
 	return token, nil
 }
 
-func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set(echo.HeaderServer, "BlueBot/1.0")
-		c.Response().Header().Set("NotReallyHeader", "thisHaveNoMeaning")
-		return next(c)
-	}
-}
-
 func checkCookie(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cookie, err := c.Cookie("sessionID")
@@ -206,30 +198,7 @@ func checkCookie(next echo.HandlerFunc) echo.HandlerFunc {
 
 func main() {
 	e := echo.New()
-
-	e.Use(ServerHeader)
-
-
-
-	// document通りでも警告出る。
-	adminGroup.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
-	}))
-
-	adminGroup.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-		if username == "tarou" && password == "1234" {
-			return true, nil
-		}
-
-		return false, nil
-	}))
-	cookieGroup.Use(checkCookie)
-	jwtGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningMethod: "HS512",
-		SigningKey:    []byte("mySecret"),
-		TokenLookup:   "cookie:JWTCookie",
-	}))
-
+	
 	adminGroup.GET("/main", mainAdmin)
 	cookieGroup.GET("/main", mainCookie)
 	jwtGroup.GET("/main", mainJwt)
