@@ -1,3 +1,4 @@
 # go-app
-## docker Golang Echo
-### git-flowで開発中
+## go echo docker のサンプル
+docker-compose build
+docker-compose up
