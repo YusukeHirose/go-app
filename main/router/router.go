@@ -1,6 +1,11 @@
 package router
 
-import "github.com/labstack/echo"
+import (
+	"../api"
+
+	"../api/middlewares"
+	"github.com/labstack/echo"
+)
 
 func Init() *echo.Echo {
 	e := echo.New()

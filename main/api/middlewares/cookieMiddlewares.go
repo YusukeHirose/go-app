@@ -1,7 +1,15 @@
 package middlewares
 
-func SetCookieMiddlewares(g *echo.Echo) {
-	cookieGroup.Use(checkCookie)
+import (
+	"log"
+	"net/http"
+	"strings"
+
+	"github.com/labstack/echo"
+)
+
+func SetCookieMiddlewares(g *echo.Group) {
+	g.Use(checkCookie)
 }
 
 func checkCookie(next echo.HandlerFunc) echo.HandlerFunc {

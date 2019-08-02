@@ -1,5 +1,12 @@
 package handlers
 
+import (
+	"log"
+	"net/http"
+
+	"github.com/labstack/echo"
+)
+
 type Monkey struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
